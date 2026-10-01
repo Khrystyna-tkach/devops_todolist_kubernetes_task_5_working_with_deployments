@@ -1,0 +1,48 @@
+apiVersion: apps/v1
+kind: Development
+metadata:
+  name: todoapp
+  namespace: todoapp
+spec:
+  replicas: 2
+strategy:
+  type: RollingUpdate
+  rollingUpdate:
+    maxUnavailable: 0
+    maxSurge: 1
+selector:
+  matchLabels:
+    app: todolist
+template:
+  metadata:
+    labels:
+      app: todolist
+  spec:
+    containers:
+      - name: todoapp
+        image: ikulyk404/todoapp:3.0.0
+    ports:
+      - containerPort: 8000
+    env:
+      - name: PYTHONUNBUFFERED
+        value: "1"
+    resources:
+      requests:
+        cpu: "100m"
+        memory: "128Mi"
+      limits:
+        cpu: "500m"
+        memory: "256Mi"
+    readinessProbe:
+        httpGet:
+          path: /api/readiness/
+          port: 8000
+        initialDelaySeconds: 5
+        periodSeconds: 5
+
+    livenessProbe:
+        httpGet:
+          path: /api/liveness/
+          port: 8000
+        initialDelaySeconds: 10
+        periodSeconds: 5
